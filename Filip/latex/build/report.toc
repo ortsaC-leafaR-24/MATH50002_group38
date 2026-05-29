@@ -1,0 +1,11 @@
+\contentsline {section}{\numberline {1}Dimensions of sets}{2}{section.1}%
+\contentsline {section}{\numberline {2}Dimensions of measures}{2}{section.2}%
+\contentsline {section}{\numberline {3}Invariant, ergodic, and physical measures}{3}{section.3}%
+\contentsline {section}{\numberline {4}SRB measures}{4}{section.4}%
+\contentsline {section}{\numberline {5}Lyapunov exponents}{4}{section.5}%
+\contentsline {section}{\numberline {6}Entropy}{5}{section.6}%
+\contentsline {section}{\numberline {7}Numerical results}{7}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Dimension comparison}{7}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}Generalised dimensions}{7}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}Local dimensions vs orbit length}{8}{subsection.7.3}%
+\contentsline {subsection}{\numberline {7.4}Random petrubations}{8}{subsection.7.4}%

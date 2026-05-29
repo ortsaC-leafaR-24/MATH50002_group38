@@ -1,0 +1,3 @@
+N,sigma,status,message
+100000,0.01,failed_orbit_diverged,"Orbit diverged at total iterate 4937 for sigma=0.01. For the additively forced Henon map, sufficiently large bounded kicks can leave the attracting region and then the quadratic term escapes."
+100000,0.05,failed_orbit_diverged,"Orbit diverged at total iterate 54 for sigma=0.05. For the additively forced Henon map, sufficiently large bounded kicks can leave the attracting region and then the quadratic term escapes."

@@ -1,0 +1,7 @@
+quantity,estimate,slope,intercept,r_squared,points_used,notes,confidence_level,bootstrap_samples,bootstrap_slope_low,bootstrap_slope_high,sensitivity_min_points,sensitivity_window_count,sensitivity_slope_min,sensitivity_slope_max
+lyapunov_lambda_1,0.42018044254210823,,,,100000,Largest Lyapunov exponent from QR tangent iteration.,,0,,,,0,,
+lyapunov_lambda_2,-1.6241532468680389,,,,100000,Smallest Lyapunov exponent from QR tangent iteration.,,0,,,,0,,
+kaplan_yorke_dimension,1.2587073869737169,,,,2,Computed from sorted Lyapunov exponents.,,0,,,,0,,
+box_counting_dimension,1.244538244619368,1.244538244619368,1.517082007510553,0.9997685492488342,20,"Finite-size slope of log occupied boxes versus log inverse epsilon, scales [0, 20).",0.95,1000,1.2345972524690763,1.2561909609969875,6.0,120,1.1993854034291993,1.3001048544230536
+correlation_dimension,1.2015333870210887,1.2015333870210887,-0.35072839793272964,0.999937212358669,20,"Finite-size slope of log C(r) versus log r using 8000 sampled points, 31996000 pairs, Theiler window 0, scales [0, 20).",0.95,1000,1.196349140857583,1.2066876481025202,6.0,120,1.1611655912356238,1.2243605736697794
+information_dimension,1.2294506019661537,1.2294506019661537,1.297130872725411,0.9998901549390983,20,"Finite-size slope of Shannon box entropy versus log inverse epsilon, scales [0, 20).",0.95,1000,1.2223592421389424,1.2378523999261273,6.0,120,1.1824849853961277,1.257211701154017
