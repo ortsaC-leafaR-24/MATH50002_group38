@@ -1,356 +1,125 @@
-\documentclass[a4paper,11pt, titlepage]{article}
+\section{ Chapter 3}
+\subsection{Introduction}
 
-%% Language and font encodings
-\usepackage[english]{babel}
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
+The Hénon map is a classical two-dimensional dissipative map which, for the standard parameter values, produces a numerically observed strange attractor \cite{Henon1976}. Its dynamics combines area contraction with local stretching and folding, making it a useful model for studying the geometric mechanisms behind strange attractors.
 
-%% Sets page size and margins
-\usepackage[a4paper,top=1in,bottom=1in,left=1in,right=1in,marginparwidth=1.75cm]{geometry}
+This part of the report focuses on the tangent dynamics of the classical Hénon map. Instead of trying to describe the full attractor exactly, this part studies how infinitesimal perturbations evolve along long numerically generated orbits. The main objects are derivative products along the orbit, from which finite-time Lyapunov exponents and finite-time stable--unstable angles are computed.
 
-%% Useful packages
-\usepackage{afterpage}
-\usepackage{amsmath}
-\usepackage{amsthm}
-\usepackage{amssymb}
-\usepackage{csquotes}
-\usepackage{enumitem}
-\usepackage{graphicx}
-\usepackage{subcaption}
-\usepackage{lipsum}
-\usepackage{booktabs}
-\newtheorem{proposition}{Proposition}
-\theoremstyle{remark}
-\newtheorem{remark}{Remark}
-\usepackage{algorithm}
-\usepackage{algpseudocode}
-\usepackage[ruled,vlined]{algorithm2e}
-\DontPrintSemicolon
-\SetAlgoNoLine
+These two diagnostics measure complementary aspects of the same geometric picture. Finite-time Lyapunov exponents measure local stretching and contraction rates, while stable--unstable angles measure the separation between the corresponding finite-time tangent directions. Together, they give a numerical description of the tangent geometry on the sampled attractor.
 
+The aim is not to prove that the classical Hénon attractor is uniformly or non-uniformly hyperbolic. Instead, the computations are interpreted as finite-time diagnostics. Positive average expansion together with area contraction supports the expected dissipative stretching mechanism, while very small stable--unstable angles indicate that a uniform lower bound on directional separation is not numerically supported. This provides a geometric and numerical viewpoint that connects naturally with the wider themes of strange attractors, Lyapunov exponents, invariant measures, entropy, and fractal dimension.
 
-% Listings (for displaying code):
-\usepackage{listings}
-\lstset{
-    frame = single, 
-    framexleftmargin=15pt
-}
-
-% Center figure captions:
-\usepackage{caption}
-\captionsetup[figure]{labelfont={bf},name={Figure},labelsep=quad}
-\captionsetup[table]{labelfont={bf},name={Table},labelsep=quad}
-
-
-% ----------- Algorithm2e setup
-\usepackage[ruled,vlined]{algorithm2e}
-\makeatletter
-\renewcommand{\SetKwInOut}[2]{%
-  \sbox\algocf@inoutbox{\KwSty{#2}\algocf@typo:}%
-  \expandafter\ifx\csname InOutSizeDefined\endcsname\relax% if first time used
-    \newcommand\InOutSizeDefined{}\setlength{\inoutsize}{\wd\algocf@inoutbox}%
-    \sbox\algocf@inoutbox{\parbox[t]{\inoutsize}{\KwSty{#2}\algocf@typo:\hfill}~}\setlength{\inoutindent}{\wd\algocf@inoutbox}%
-  \else% else keep the larger dimension
-    \ifdim\wd\algocf@inoutbox>\inoutsize%
-    \setlength{\inoutsize}{\wd\algocf@inoutbox}%
-    \sbox\algocf@inoutbox{\parbox[t]{\inoutsize}{\KwSty{#2}\algocf@typo:\hfill}~}\setlength{\inoutindent}{\wd\algocf@inoutbox}%
-    \fi%
-  \fi% the dimension of the box is now defined.
-  \algocf@newcommand{#1}[1]{%
-    \ifthenelse{\boolean{algocf@inoutnumbered}}{\relax}{\everypar={\relax}}%
-%     {\let\\\algocf@newinout\hangindent=\wd\algocf@inoutbox\hangafter=1\parbox[t]{\inoutsize}{\KwSty{#2}\algocf@typo\hfill:}~##1\par}%
-    {\let\\\algocf@newinout\hangindent=\inoutindent\hangafter=1\parbox[t]{\inoutsize}{\KwSty{#2}\algocf@typo:\hfill}~##1\par}%
-    \algocf@linesnumbered% reset the numbering of the lines
-  }}%
-\makeatother
-% --------- end algorithm2e setup
-
-% \bm allows typing bold math:
-\usepackage{bm}
-\usepackage[normalem]{ulem}
-
-\usepackage[colorinlistoftodos]{todonotes}
-\usepackage[colorlinks=true, allcolors=blue]{hyperref}
-
-\renewcommand*{\rmdefault}{bch}
-\renewcommand*{\ttdefault}{lmtt}
-\newcommand{\citationneeded}{\textcolor{red}{[citation-needed]}}
-
-\DeclareMathOperator*{\argmin}{\arg\!\min}
-\DeclareMathOperator*{\argmax}{\arg\!\max}
-
-% Add bigger skip between paragraphs, makes reading easier:
-\setlength{\parskip}{0.5em}
-
-% Bibliography
-\usepackage[numbers, comma, square, sort&compress]{natbib}
-\bibliographystyle{abbrvunsrtnat.bst}
-
-
-% Theorem, Lemma, Corollary and Proofs
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}[section]
-\theoremstyle{plain}
-\newtheorem{theorem}{Theorem}[section]
-\newtheorem{corollary}{Corollary}[theorem]
-\newtheorem{lemma}[theorem]{Lemma}
-\theoremstyle{remark}
-
-%----------------------------------------------------------------------------------------
-% END OF DOCUMENT CONFIGURATION
-%----------------------------------------------------------------------------------------
-
-%----------------------------------------------------------------------------------------
-% IMPORTANT INFORMATION TO MODIFY FOR THE TITLE PAGE
-%----------------------------------------------------------------------------------------
-\newcommand{\reporttitle}{Title} % Title of your research project
-\newcommand{\reportauthorA}{Student name 1 (CID: -------------)} % First Name, Last Name and CID of student 1
-
-\begin{document}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Title page
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{titlepage}
-\newcommand{\HRule}{\rule{\linewidth}{0.5mm}} % Defines a new command for the horizontal lines, change thickness here
-%----------------------------------------------------------------------------------------
-%	LOGO SECTION
-%----------------------------------------------------------------------------------------
-\includegraphics[width=8cm]{Imperial_logo.png}\\[1cm] % Include a department/university logo - this will require the graphicx package
-%----------------------------------------------------------------------------------------
-\center % Center everything on the page
-%----------------------------------------------------------------------------------------
-%	HEADING SECTIONS
-%----------------------------------------------------------------------------------------
-% For M3R or M4R reports, comment out as appropriate
-\textsc{\LARGE Imperial College London}\\[0.5cm] 
-\textsc{\Large Department of Mathematics}\\[1.5cm] 
-\textsc{\Large Second-year Group Research Project}\\[0.5cm]
-%----------------------------------------------------------------------------------------
-%	TITLE SECTION
-%----------------------------------------------------------------------------------------
-\makeatletter
-\HRule \\[0.6cm]
-{ \huge \bfseries \reporttitle}\\[0.6cm] % Title of your document
-\HRule \\[1.5cm]
-%----------------------------------------------------------------------------------------
-%	AUTHOR SECTION
-%----------------------------------------------------------------------------------------
-\begin{minipage}{0.4\textwidth}
-\begin{flushleft} \large
-\emph{Author:}\\
-\reportauthorA \\
-\reportauthorB \\
-\reportauthorC \\
-\reportauthorD \\
-\reportauthorE
-\end{flushleft}
-\end{minipage}
-~
-\begin{minipage}{0.4\textwidth}
-\begin{flushright} \large
-\emph{Supervisor(s):} \\
-\supervisor % Supervisor's name
-\end{flushright}
-\end{minipage}\\[2cm]
-\makeatother
-%----------------------------------------------------------------------------------------
-%	FOOTER & DATE SECTION
-%----------------------------------------------------------------------------------------
-\vfill
-\makeatletter
-{\large \today}\\[2cm] % Date, change the \today to a set date if you want to be precise
-\makeatother
-\end{titlepage}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Table of contents
-\tableofcontents
-\clearpage
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Main sections
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Main sections
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\section{Introduction}
-\label{sec:introduction}
-
-A discrete dynamical system is generated by iterating a map. Although the rule may be simple, the long-term behaviour of its orbits can be highly complicated. In this report, the main object is the Hénon map with the classical parameter choice and the Hénon attractor.
-
-The main theme of the report is hyperbolic behaviour. The Smale horseshoe provides the clean reference model: stretching and folding lead to symbolic dynamics, sensitive dependence on initial conditions, and a uniformly hyperbolic invariant set. The Hénon attractor has a similar geometric mechanism, but the hyperbolic structure is more complicated. 
-
-The numerical part of this report studies typical hyperbolic behaviour along long orbits. The relevant theoretical background comes from invariant measures, Birkhoff's Ergodic Theorem, and Oseledets' Multiplicative Ergodic Theorem, but the computations in this report remain finite-time diagnostics rather than asymptotic proofs. The computations support a hyperbolic-type pattern.
-
-\section{Theoretical background}
+\subsection{Theoretical background}
 \label{sec:theoretical-model}
 
-\subsection{Discrete dynamical systems and orbits}
-\label{subsec:discrete-dynamical-systems}
 
-\begin{definition}[Discrete dynamical system]
-Let \(X\) be a metric space and let \(f:X\to X\) be a map. The discrete dynamical system generated by \(f\) is the iteration
-\[
-x_{n+1}=f(x_n), \qquad x_n=f^n(x_0).
-\]
-\end{definition}
-
-\begin{definition}[Forward orbit]
-For \(x_0\in X\), the forward orbit of \(x_0\) is
-\[
-\mathcal O^+(x_0)
-=
-\{x_0,f(x_0),f^2(x_0),\ldots\}.
-\]
-\end{definition}
-
-\subsection{Invariant sets and attractors}
+\subsubsection{Attractors and numerical samples}
 \label{subsec:invariant-sets}
 
-We now recall the basic terminology for invariant and attracting sets, following Robinson's notation. Let \(f:M\to M\) be a diffeomorphism.
+Let \(f:M\to M\) be a continuous map on a metric space \(M\). A set
+\(\Lambda\subset M\) is called invariant if
+\(f(\Lambda)=\Lambda,\) and positively invariant if
+\(
+f(\Lambda)\subset \Lambda.
+\)
 
-\begin{definition}[Invariant set]
-A set \(\Lambda\subset M\) is called invariant under \(f\) if
-\(f(\Lambda)=\Lambda .\)
-It is called positively invariant if
-\(f(\Lambda)\subset \Lambda .\)
+A compact region \(N\subset M\) is called a trapping region if \(f(N)\subset \operatorname{int}(N).\) In this case the forward images form a nested sequence \(N\supset f(N)\supset f^2(N)\supset \cdots,\) and the associated attracting set is \(\Lambda=\bigcap_{k\geq 0} f^k(N).\)
+
+The basin of attraction of \(\Lambda\) is
+\(W^s(\Lambda) = \{x\in M:\operatorname{dist}(f^n(x),\Lambda)\to 0
+\text{ as } n\to\infty\}.\) 
+
+The classical Hénon attractor is treated in this report as a numerically observed attracting set. If \(N\) is a trapping region, then repeated application of the map leaves a limiting invariant set \(\Lambda=\bigcap_{k\geq 0} f^k(N),\)
+which is the set approached by orbits starting in its basin of attraction \(W^s(\Lambda)\). In the computations below, we do not attempt to construct \(\Lambda\) exactly. Instead, we iterate one initial condition for a long time, discard the transient part, and use the remaining orbit points as a finite sample of the observed attractor. This is the numerical object on which the finite-time Lyapunov exponents and stable--unstable angle diagnostics are computed. In this sense, the attractor is called strange because it combines attraction with sensitive dependence on initial conditions and complicated geometry \cite{Robinson1999}.
+
+
+
+
+
+\subsubsection{Invariant measures and typical orbits}
+
+\begin{definition}[Invariant and ergodic measure]
+Let \(f:X\to X\) be a measurable map on a metric space \(X\). A probability measure \(\mu\) on \(X\) is called \(f\)-invariant if \(\mu(f^{-1}(A))=\mu(A)\)
+for every measurable set \(A\subset X\).
+
+An \(f\)-invariant probability measure \(\mu\) is called ergodic if every \(f\)-invariant measurable set has either measure \(0\) or measure \(1\).
 \end{definition}
 
-Thus an invariant set is a dynamically closed set on which the long-term dynamics can be studied.
+Invariant measures describe the statistical distribution of orbits. Ergodicity means, informally, that the system cannot be decomposed into two smaller invariant statistical components of positive measure. Thus, for an ergodic measure, typical orbits have the same statistical behaviour with respect to that measure.
 
-\begin{definition}[Trapping region]
-A compact region \(N\subset M\) is called a trapping region for \(f\) if
+\begin{theorem}[Birkhoff ergodic theorem, ergodic probability case]
+Let \((X,\mathcal B,\mu)\) be a probability space, and let \(f:X\to X\) be a \(\mu\)-preserving ergodic map. If 
+\(\varphi\in L^1(\mu)\), then for \(\mu\)-almost every \(x\in X\),
 \[
-f(N)\subset \operatorname{int}(N).
+\frac{1}{N}\sum_{j=0}^{N-1}\varphi(f^j(x))
+\to
+\int_X \varphi d\mu
+\qquad
+\text{as } N\to\infty .
 \]
+\end{theorem}
+
+
+This theorem explains why a single long orbit can carry statistical information about the system. The left-hand side is a time average along one orbit, while the right-hand side is a space average with respect to the invariant measure. This is the sense in which ergodic theory studies typical orbits rather than exact pointwise descriptions of every orbit \cite{RasmussenErgodic2017,ColoniusKliemann2014}.
+
+\begin{definition}[Empirical measure of a finite orbit]
+Given a finite orbit segment
+\(
+x,f(x),\ldots,f^{m-1}(x),
+\)
+the associated empirical measure is
+\[
+\mu_m=\frac{1}{m}\sum_{j=0}^{m-1}\delta_{f^j(x)},\]
+where \(\delta_y\) denotes the Dirac measure at \(y\).
 \end{definition}
 
-The forward images of a trapping region form a nested sequence
-\[
-N\supset f(N)\supset f^2(N)\supset \cdots .
-\]
+In numerical computations, after discarding a transient, a long orbit is treated as a finite sample of the observed attracting set. The empirical measure \(\mu_m\) records how often the orbit visits different regions of the attractor. If the orbit is typical for a natural invariant measure, then \(\mu_m\) gives a numerical approximation of the statistics of that measure.
 
-\begin{definition}[Attracting set]
-If \(N\) is a trapping region, the associated attracting set is
-\[
-\Lambda=\bigcap_{k\geq 0} f^k(N).
-\]
-\end{definition}
+\begin{remark}[Physical and SRB measures]
+For dissipative chaotic attractors, the relevant invariant measure is often expected to be a physical or SRB measure. Informally, such a measure describes the statistics observed by typical initial conditions in the basin of attraction. In this report, we do not prove the existence or uniqueness of an SRB measure for the classical Hénon attractor. We only use this viewpoint to justify treating long post-transient orbits as numerical samples of the observed attractor.
+\end{remark}
 
-The attracting set is the limiting set left after repeatedly applying the map to the trapping region. It is invariant, since
-\[
-f(\Lambda)
-=
-f\left(\bigcap_{k\geq 0}f^k(N)\right)
-=
-\bigcap_{k\geq 1}f^k(N)
-=
-\Lambda .
-\]
+This measure-theoretic viewpoint explains why later asymptotic statements, such as Oseledets' theorem, are interpreted as almost-everywhere statements with respect to an invariant measure.
 
-\begin{definition}[Basin of attraction]
-The basin of attraction of an attracting set \(\Lambda\) is the set of points whose forward orbits approach (\Lambda):
-\[
-W^s(\Lambda)
-=
-{x\in M:\operatorname{dist}(f^n(x),\Lambda)\to 0
-\text{ as } n\to\infty}.
-\]
-\end{definition}
 
-So \(\Lambda\) is the set being approached, while \(W^s(\Lambda)\) is the set of initial conditions attracted to it.
 
-\begin{definition}[\(\varepsilon\)-chain and chain transitivity]
-Let \(\varepsilon>0\). An \(\varepsilon\)-chain from \(x\) to \(y\) in \(\Lambda\) is a finite sequence
-\[
-x=x_0,x_1,\ldots,x_m=y
-\]
-such that
-\[
-d(f(x_i),x_{i+1})<\varepsilon
-\qquad\text{for } i=0,\ldots,m-1.
-\]
-The map \(f|_{\Lambda}\) is called chain transitive if, for any \(x,y\in\Lambda\) and any \(\varepsilon>0\), there exists an \(\varepsilon\)-chain from \(x\) to \(y\) contained in \(\Lambda\).
-\end{definition}
 
-\begin{definition}[Attractor]
-An attracting set \(\Lambda\) is called an attractor if the restricted dynamics \(f|_{\Lambda}\) is chain transitive.
-\end{definition}
-
-For the Hénon map \(F_{AB}\), the numerically observed strange attractor is treated as a finite approximation of an attracting invariant set. In practice, we iterate a typical initial condition for a long time, discard the transient part, and use the remaining orbit points as a sample of the observed attracting set.
-
-\subsection{Tangent space and linearisation}
-\label{subsec:Tangent space and linearisation}
+\subsubsection{Tangent dynamics and derivative cocycle}
 
 \begin{definition}[Tangent vector and tangent space in Euclidean space]
 Let \(p\in \mathbb R^n\). 
 
 \begin{enumerate}[label=(\arabic*)]
-    \item A tangent vector at \(p\) is a pair \(v_p = (p, v)\), $v\in \mathbb R^n$. The point \(p\) is called the base point of the tangent vector, and \(v\) is called its direction vector. 
+    \item A tangent vector at \(p\) is a pair \(v_p = (p, v)\), $v\in \mathbb R^n$. The point \(p\) is called the base point of the tangent vector, and \(v\) is its direction vector. 
 
     \item The tangent space at \(p\), denoted by \(T_p\mathbb R^n\), is the set of all
     tangent vectors based at \(p\):
     \[
     T_p\mathbb R^n
     =
-    \{(p,v):v\in\mathbb R^n\}.
+    \{(p,v):v\in\mathbb R^n\} \cong \mathbb R^n.
     \]
-    It is a vector space under the operations
-    \[
-    (p,v)+(p,w)=(p,v+w),
-    \]
-    and
-    \[
-    \alpha(p,v)=(p,\alpha v),
-    \qquad \alpha\in\mathbb R.
-    \]
-    Hence \(T_p\mathbb R^n\) is isomorphic to \(\mathbb R^n\).
     
-    \item The tangent bundle/space of \(\mathbb R^n\) is the disjoint union of the tangent
-    spaces at all points:
-    \[
-    T\mathbb R^n
-    =
-    \bigcup_{p\in\mathbb R^n}T_p\mathbb R^n.
-    \]
-    Equivalently,
-    \[
-    T\mathbb R^n
-    =
-    \{(p,v):p\in\mathbb R^n,\ v\in\mathbb R^n\}
-    =
-    \mathbb R^n\times\mathbb R^n.
-    \]
 \end{enumerate}
 
 \end{definition}
 
-\label{subsec:linearisation}
-
 \begin{definition}[Derivative and linearisation in Euclidean space]
 Let \(f:\mathbb R^n\to\mathbb R^m\) be a \(C^1\) map. The derivative of \(f\)
 at \(p\in\mathbb R^n\) is the linear map
-\[
+\(
 Df_p:T_p\mathbb R^n\to T_{f(p)}\mathbb R^m
-\]
-defined by
-\[
+\)
+with
+\(
 Df_p(p,v)=(f(p),Df(p)v),
-\]
+\)
 where \(Df(p)\) is the Jacobian matrix of \(f\) at \(p\).
 
-The derivative \(Df_p\) is also called the linearisation of \(f\) at \(p\),
-because it gives the first-order approximation
-\[
-f(p+v)=f(p)+Df(p)v+o(\|v\|)
-\qquad \text{as } \|v\|\to 0.
-\]
+\(Df_p\) gives the first-order approximation
+\(
+f(p+v)=f(p)+Df(p)v+o(\|v\|)\) as \( \|v\|\to 0.
+\)
 \end{definition}
 
 \begin{definition}[Derivative cocycle]
@@ -366,19 +135,13 @@ Df_{f^{k-1}(p)}
 Df_{f^{k-2}(p)}
 \cdots
 Df_{f(p)}
-Df_p .
-\]
-Equivalently, if \(p_j=f^j(p)\), then
-\[
-Df_p^k
-=
-Df_{p_{k-1}}Df_{p_{k-2}}\cdots Df_{p_1}Df_{p_0}.
-\]
+Df_p\].
+
 
 The family
-\[
+\(
 (p,k)\mapsto Df_p^k
-\]
+\)
 is called the derivative cocycle over \(f\). It satisfies the cocycle identity
 \[
 Df_p^{k+\ell}
@@ -389,51 +152,116 @@ Df_{f^\ell(p)}^k Df_p^\ell
 \]
 \end{definition}
 
-Let \(p_0\in\mathbb R^n\) and consider its orbit
+\begin{remark}[Negative iterates]
+If \(f\) is a \(C^1\) diffeomorphism, then negative iterates are also defined. For
+\(k\geq 1\), we write
 \[
-p_{j+1}=f(p_j),
-\qquad j\geq 0.
+Df_p^{-k}:=D(f^{-k})_p:T_p\mathbb R^n\to T_{f^{-k}(p)}\mathbb R^n .
 \]
-The derivative cocycle describes the evolution of infinitesimal perturbations
-along an orbit. Let
-\[
-p_0=p,
-\qquad
-p_{j+1}=f(p_j)=f^{j+1}(p).
-\]
-If \(v_0\in T_{p_0}\mathbb R^n\cong\mathbb R^n\) is a small perturbation of
-the initial point \(p_0\), then after one step the perturbation is approximated by
-\[
-v_1=Df(p_0)v_0.
-\]
-After two steps,
-\[
-v_2=Df(p_1)v_1
-=
-Df(p_1)Df(p_0)v_0.
-\]
-Inductively, after \(k\) steps,
-\[
-v_k
-=
-Df(p_{k-1})\cdots Df(p_1)Df(p_0)v_0
-=
-A(k,p_0)v_0.
-\]
-Thus the nonlinear orbit \(p_{j+1}=f(p_j)\) induces the linearised perturbation dynamics by
+Here \(Df_p^{-k}\) denotes the derivative of the inverse iterate \(f^{-k}\) at
+\(p\).
+\end{remark}
+
+
+
+Let \(p_j=f^j(p)\). After identifying \(T_{p_j}\mathbb R^n\) with \(\mathbb R^n\), an infinitesimal perturbation evolves by \(
+v_{j+1}=Df(p_j)v_j.\) Hence after \(k\) steps,
 \(
-v_{j+1}=Df(p_j)v_j.
+v_k=Df_p^k v_0
+=
+Df(p_{k-1})\cdots Df(p_0)v_0.
 \)
+Thus the nonlinear orbit induces a linearised perturbation dynamics along the orbit.
 
 
 
 
-\subsection{Hyperbolicity}
-\label{subsec:Hyperbolicity}
-\begin{definition}[Hyperbolic structure and hyperbolic invariant set]
+\subsubsection{Lyapunov exponents and Oseledets' theorem}
+
+\begin{definition}[Lyapunov exponent]
+Let \(f:\mathbb R^n\to\mathbb R^n\) be differentiable and let \(x\in \mathbb R^n\). For a nonzero tangent vector \(v\in T_x\mathbb R^n \), the Lyapunov exponent in the direction \(v\) is
+\(\lambda(x,v) =
+\lim_{n\to\infty}
+\frac{1}{n}\log \|D(f^n)_x v\|,
+\)
+when the limit exists.
+\end{definition}
+
+Lyapunov exponents measure the asymptotic exponential growth or contraction of tangent vectors under the derivative cocycle. A positive exponent corresponds to exponential expansion in the corresponding tangent direction, while a negative exponent corresponds to exponential contraction. The existence of these limits is by Oseledets'
+multiplicative ergodic theorem for typical points.
+
+
+
+
+
+\begin{theorem}[Oseledets' theorem for \(C^1\) diffeomorphisms on \(\mathbb R^2\)]
+Let \(f:\mathbb R^2\to\mathbb R^2\) be a \(C^1\) diffeomorphism, let
+\(\Lambda\subset\mathbb R^2\) be a compact \(f\)-invariant set, and let \(\mu\)
+be an ergodic \(f\)-invariant probability measure supported on \(\Lambda\).
+Assume
+\[
+\log^+\|Df\|,\ \log^+\|Df^{-1}\|\in L^1(\mu),
+\]
+where \(\log^+(t)=\max\{\log t,0\}\). Then there exists an \(f\)-invariant set
+\(\Lambda_0\subset\Lambda\) with \(\mu(\Lambda_0)=1\) such that, for every
+\(p\in\Lambda_0\), there are Lyapunov exponents \(\alpha_1>\alpha_2>\cdots>\alpha_\ell
+\)
+and a measurable invariant splitting
+\[
+T_p\mathbb R^2
+=
+E_1(p)\oplus\cdots\oplus E_\ell(p),
+\qquad
+Df_pE_i(p)=E_i(f(p)),
+\]
+such that for every \(0\neq v\in E_i(p)\),
+\[
+\lim_{k\to\infty}\frac1k\log\|Df_p^k v\|
+=
+\alpha_i.
+\]
+
+Moreover, if \(\sigma_1(Df_p^k)\geq\sigma_2(Df_p^k)>0\) are the singular
+values of \(Df_p^k\), then
+\[
+\lim_{k\to\infty}\frac1k\log\sigma_j(Df_p^k),
+\qquad j=1,2,
+\]
+exist and give the Lyapunov exponents counted with multiplicity.
+\end{theorem}
+
+In our setting, the integrability condition is automatically satisfied
+because \(Df\) and \(Df^{-1}\) are continuous and hence bounded on \(\Lambda\).
+The theorem justifies two things. First, Lyapunov exponents are well-defined
+asymptotic tangent growth rates for \(\mu\)-almost every point. Second, these
+growth rates can be obtained from singular values of the derivative cocycle.
+
+This motivates the finite-time Lyapunov exponents used numerically:
+\[
+\lambda_j^{(k)}(p)
+=
+\frac1k\log\sigma_j(Df_p^k),
+\qquad j=1,2.
+\]
+They are finite-window versions of the asymptotic Oseledets quantities. In this
+report, they are used as numerical diagnostics of stretching and contraction, not
+as proofs that the limiting exponents exist at every sampled point.
+
+\begin{remark}[Relation with stable and unstable directions]
+If the two Lyapunov exponents satisfy \(\alpha_1>0>\alpha_2\), the Oseledets
+splitting gives an expanding direction \(E_1(p)\) and a contracting direction
+\(E_2(p)\) for \(\mu\)-almost every \(p\). This is weaker than uniform
+hyperbolicity, where the stable and unstable directions are defined at every point,
+vary continuously, and satisfy uniform contraction and expansion estimates.
+\end{remark}
+
+
+
+\subsubsection{Hyperbolicity and uniform transversality}
+
+\begin{definition}[Hyperbolic invariant set]
 Let \(f:\mathbb R^n\to\mathbb R^n\) be a \(C^1\) diffeomorphism, and let
-\(\Lambda\subset \mathbb R^n\) be a compact invariant set. We say that
-\(\Lambda\) has a hyperbolic structure for \(f\), or \(\Lambda\) is a hyperbolic invariant set if for every \(p\in\Lambda\),
+\(\Lambda\subset \mathbb R^n\) be a compact invariant set. We say \(\Lambda\) is a hyperbolic invariant set if for every \(p\in\Lambda\),
 the tangent space \(T_p\mathbb R^n\) admits a direct-sum decomposition
 \[
 T_p\mathbb R^n
@@ -444,11 +272,10 @@ such that:
 
 \begin{enumerate}[label=(\arabic*)]
     \item The splitting is invariant under the derivative:
-    \[
+    \(
     Df_p(E_p^s)=E_{f(p)}^s,
-    \qquad
     Df_p(E_p^u)=E_{f(p)}^u.
-    \]
+    \)
 
     \item There exist constants \(C\geq 1\) and \(0<\lambda<1\), independent of
     \(p\in\Lambda\), such that for all \(k\geq 0\),
@@ -473,91 +300,46 @@ The subspaces \(E_p^s\) and \(E_p^u\) are called the stable and unstable
 subspaces at \(p\), respectively.
 \end{definition}
 
-\begin{remark}[Uniformity in the definition]
-In the above definition, the constants \(C\geq 1\) and \(0<\lambda<1\) are
-independent of the base point \(p\in\Lambda\). Therefore a hyperbolic invariant
-set in this sense is already uniformly hyperbolic.
+\begin{remark}[Uniform versus non-uniform hyperbolicity]
+In the above definition, the constants \(C\geq 1\) and \(0<\lambda<1\) are independent of the base point \(p\in\Lambda\). Thus a hyperbolic invariant set in this sense is uniformly hyperbolic.
 
-This is different from nonuniform hyperbolicity, where one typically assumes
-that the Lyapunov exponents are nonzero for almost every point with respect to
-an invariant measure. In that setting, the stable and unstable splitting may exist
-only almost everywhere, may be merely measurable rather than continuous, and
-the contraction and expansion rates need not be controlled by constants uniform
-over the whole set[].
+This is different from non-uniform hyperbolicity. In the non-uniform setting, one usually works with an invariant probability measure and assumes that the Lyapunov exponents are nonzero for \(\mu\)-almost every point. The stable--unstable splitting is then typically measurable and defined only almost everywhere, and the contraction and expansion estimates need not be controlled by constants uniform over the whole set \cite{EckmannRuelle1985,Barreira2012}.
 \end{remark}
 
+
 \begin{definition}[Stable and unstable directions in dimension two]
-Suppose \(f:\mathbb R^2\to\mathbb R^2\) is a \(C^1\) diffeomorphism and
-\(\Lambda\subset\mathbb R^2\) is a hyperbolic invariant set. If for each \(p\in\Lambda\),
-\[
+Let \(f:\mathbb R^2\to\mathbb R^2\) be a \(C^1\) diffeomorphism and
+\(\Lambda\subset\mathbb R^2\) be a hyperbolic invariant set. If for each \(p\in\Lambda\),
+\(
 \dim E_p^s=\dim E_p^u=1,
-\]
+\)
 then \(E_p^s\) and \(E_p^u\) are called the stable and unstable directions at
 \(p\), respectively.
 
-In this case, \(E_p^s\) and \(E_p^u\) are one-dimensional subspaces of
-\(
-T_p\mathbb R^2\cong \mathbb R^2.
-\)
+
 \end{definition}
 
-\begin{remark}[Meaning of the stable and unstable subspaces]
-The stable subspace \(E_p^s\) consists of infinitesimal directions that are
-contracted exponentially under forward iteration. The unstable subspace
-\(E_p^u\) consists of infinitesimal directions that are contracted exponentially
-under backward iteration, equivalently expanded exponentially under forward
-iteration.
+In \(\mathbb R^2\), if both \(E_p^s\) and \(E_p^u\) are one-dimensional, they are lines in \(T_p\mathbb R^2\cong \mathbb R^2.\)
+The stable direction \(E_p^s\) consists of infinitesimal directions contracted under forward iteration. The unstable direction \(E_p^u\) consists of infinitesimal directions expanded under forward iteration, equivalently contracted under backward iteration.
 
-More precisely, if \(v^s\in E_p^s\), then
+If \(E_p^s\) and \(E_p^u\) are spanned by unit vectors \(e_p^s\) and \(e_p^u\), respectively, the angle between the two directions is
 \[
-\|Df_p^k v^s\|
-\leq
-C\lambda^k\|v^s\|
-\qquad
-\text{as } k\to\infty.
+\theta(p)
+=
+\angle(E_p^s,E_p^u)
+=
+\arccos\left(\left|\langle e_p^s,e_p^u\rangle\right|\right)
+\in [0,\pi/2].
 \]
-If \(v^u\in E_p^u\), then
-\[
-\|Df_p^{-k} v^u\|
-\leq
-C\lambda^k\|v^u\|
-\qquad
-\text{as } k\to\infty.
-\]
-The use of backward iterates in the definition of \(E_p^u\) is important:
-forward iteration expands unstable vectors, so backward iteration is the
-contracting direction used to characterize them.
-\end{remark}
+The absolute value is used because the angle is between one-dimensional subspaces.
 
-\begin{definition}[Angle between stable and unstable directions] Suppose \(f:\mathbb R^2\to\mathbb R^2\) is a \(C^1\) diffeomorphism and \(\Lambda\subset\mathbb R^2\) is a hyperbolic invariant set with one-dimensional stable and unstable directions. Let \(e_p^s\) and \(e_p^u\) be unit vectors spanning \(E_p^s\) and \(E_p^u\), respectively. The angle between the stable and unstable directions at \(p\) is defined by \[ \theta(p)=\angle(E_p^s,E_p^u)= \arccos\left( \left|\langle e_p^s,e_p^u\rangle\right| \right) \in [0,\pi/2]. \] \end{definition} 
 
-\begin{remark}[Meaning of the unit vectors \(e_p^s\) and \(e_p^u\)]
-The vectors \(e_p^s\) and \(e_p^u\) are unit vectors chosen to span the
-one-dimensional stable and unstable subspaces:
-\[
-E_p^s=\operatorname{span}(e_p^s),
-\qquad
-E_p^u=\operatorname{span}(e_p^u).
-\]
-They are not, in general, eigenvectors of the single matrix \(Df(p)\). The
-reason is that
-\[
-Df_p:T_p\mathbb R^2\to T_{f(p)}\mathbb R^2
-\]
-maps tangent vectors at \(p\) to tangent vectors at \(f(p)\), rather than mapping
-\(T_p\mathbb R^2\) to itself. The invariant splitting is instead characterised by
-\[
-Df_p(E_p^s)=E_{f(p)}^s,
-\qquad
-Df_p(E_p^u)=E_{f(p)}^u.
-\]
-Thus the stable and unstable directions are directions transported along the
-orbit by the derivative cocycle.
-
-At a fixed point \(p=f(p)\), these directions reduce to the stable and unstable
-eigenspaces of \(Df(p)\). For a general point on a hyperbolic invariant set, they
-are not pointwise eigenvectors of \(Df(p)\), but invariant directions along the
-orbit.
+\begin{remark}
+The directions \(E_p^s\) and \(E_p^u\) are not generally eigenvectors of \(Df(p)\). The derivative maps
+\(
+Df_p:T_p\mathbb R^2\to T_{f(p)}\mathbb R^2,
+\)
+so it transports directions from one tangent space to the next along the orbit. At a fixed point, these directions coincide with the stable and unstable eigenspaces of \(Df(p)\). At a periodic point of period \(q\), they correspond to the stable and unstable eigenspaces of \(D(f^q)(p)\).
 \end{remark}
 
 \begin{proposition}[Basic properties of hyperbolic sets]
@@ -566,525 +348,192 @@ Let \(\Lambda\) be a hyperbolic invariant set for a \(C^1\) diffeomorphism
 
 \begin{enumerate}[label=(\arabic*)]
     \item The stable and unstable subspaces vary continuously with the base point:
-    \[
-    p\mapsto E_p^s,
-    \qquad
-    p\mapsto E_p^u.
-    \]
+    \(
+    p\mapsto E_p^s\), 
+    \(p\mapsto E_p^u.
+    \)
 
     \item The stable and unstable subspaces are uniformly transverse:
-    \[
-    \inf_{p\in\Lambda}
-    \angle(E_p^s,E_p^u)
-    >
-    0.
-    \]
+    \(
+    \inf_{p\in\Lambda}\angle(E_p^s,E_p^u)>0.\)
 \end{enumerate}
 \end{proposition}
 
-The first property shows if two points \(p,q\in\Lambda\) are close, then the corresponding subspaces \(E_p^s,E_q^s\) and \(E_p^u,E_q^u\) are also close. Thus the stable and unstable directions do not jump discontinuously as the base point moves along \(\Lambda\). 
 
-The second property says that the stable and unstable subspaces remain uniformly separated. In dimension two, this means that the stable and unstable directions are never tangent, and their angle is bounded away from zero. This is stronger than merely requiring \(E_p^s\neq E_p^u\) at each point. It rules out the possibility that the two directions become arbitrarily close somewhere on the invariant set. 
-
-These two properties are important for the numerical diagnostics used later. Continuity means that stable and unstable directions can be meaningfully tracked along an orbit. Uniform transversality means that, for a uniformly hyperbolic set, the angle between the stable and unstable directions should not approach zero. Therefore, observing very small angles in finite-time computations can be interpreted as evidence of non-uniform behaviour or a possible near-tangency.
-
-
-\subsection{The Smale horseshoe as a reference model}
-\label{subsec:Smale-horseshoe}
-
-The Smale horseshoe is a standard example of a uniformly hyperbolic invariant
-set with complicated dynamics. It provides a clean reference case
-where hyperbolicity and symbolic dynamics can be described explicitly.
-
-\begin{definition}[Full two-shift]
-Let
+Property (2) is the theoretical basis for the angle diagnostic. Indeed, for a uniformly hyperbolic set, the subspaces \(E_p^s\) and \(E_p^u\) depend continuously on \(p\). Hence the angle function
 \[
-\Sigma_2=\{0,1\}^{\mathbb Z}
+p\mapsto \angle(E_p^s,E_p^u)
 \]
-be the space of bi-infinite sequences on two symbols. The shift map
+is continuous on the compact set \(\Lambda\). Since \(E_p^s\cap E_p^u=\{0\}\) for every \(p\in\Lambda\), this angle is strictly positive at every point. By compactness, it therefore has a positive minimum:
 \[
-\sigma:\Sigma_2\to\Sigma_2
+\inf_{p\in\Lambda}\angle(E_p^s,E_p^u)>0.
 \]
-is defined by
-\[
-(\sigma s)_j=s_{j+1},
-\qquad
-s=(s_j)_{j\in\mathbb Z}\in\Sigma_2.
-\]
-\end{definition}
+Thus, in \(\mathbb R^2\), uniform hyperbolicity implies that the stable and unstable directions never become tangent and cannot become arbitrarily close anywhere on \(\Lambda\).
 
-\begin{definition}[Horseshoe invariant set]
-Let \(R\subset\mathbb R^2\) be the rectangle used in the horseshoe construction,
-and let \(f:\mathbb R^2\to\mathbb R^2\) be the corresponding horseshoe
-diffeomorphism. The invariant set of the horseshoe is
-\[
-\Lambda
-=
-\bigcap_{n\in\mathbb Z} f^n(R).
-\]
-Thus \(\Lambda\) consists of the points whose full forward and backward orbits
-remain in \(R\).
-\end{definition}
+This justifies the numerical angle diagnostic used later. If the sampled attractor behaved like a uniformly hyperbolic invariant set, the finite-time stable and unstable directions would be expected to remain separated by a positive lower bound. Therefore, persistent very small finite-time angles do not prove non-uniform hyperbolicity, but they indicate that the computation does not support a uniform lower bound on directional separation.
 
-\begin{theorem}[Basic properties of the Smale horseshoe]
-For the Smale horseshoe map \(f\), the invariant set
-\[
-\Lambda
-=
-\bigcap_{n\in\mathbb Z} f^n(R)
-\]
-has the following properties:
 
-\begin{enumerate}[label=(\arabic*)]
-    \item \(\Lambda\) is compact and invariant:
-    \[
-    f(\Lambda)=\Lambda.
-    \]
 
-    \item \(\Lambda\) is a Cantor-type set.
-
-    \item \(\Lambda\) is uniformly hyperbolic. In particular, for each
-    \(p\in\Lambda\),
-    \[
-    T_p\mathbb R^2
-    =
-    E_p^s\oplus E_p^u,
-    \]
-    where \(E_p^s\) is contracted under forward iteration and \(E_p^u\) is
-    expanded under forward iteration.
-
-    \item The dynamics of \(f\) on \(\Lambda\) is topologically conjugate to the
-    full two-shift. That is, there exists a homeomorphism
-    \[
-    h:\Lambda\to\Sigma_2
-    \]
-    such that
-    \[
-    h\circ f=\sigma\circ h.
-    \]
-\end{enumerate}
-\end{theorem}
-
-The horseshoe provides the ideal uniformly hyperbolic reference case. We now
-turn to the Hénon map, which has a similar geometric mechanism of stretching,
-folding, and dissipation, but whose classical attractor is much less rigid.
+\begin{remark}[the Smale horseshoe]
+The Smale horseshoe is a standard uniformly hyperbolic model of stretching and folding \cite{Robinson1999}. It provides a clean contrast with the classical Hénon attractor: the horseshoe has a rigorously defined hyperbolic invariant set and symbolic coding, whereas the Hénon attractor considered here is studied through finite-time numerical diagnostics along long forward orbits. 
+\end{remark}
 
 
 
 
 
-\section{The Hénon map}
+
+\subsubsection{The Hénon map}
 \label{sec:Hénon-map}
 
-\subsection{Definition and basic properties}
-\label{Definition and basic properties}
-
-
-
-
-
-\begin{definition}[Hénon map]
-For parameters \(A,B\in\mathbb R\), define
-\[
-F_{AB}(x,y)
-=
-(A-By-x^2,x).
-\]
-The classical parameters are $A=1.4, B=-0.3.$
-\end{definition}
-
-For the classical parameters \(A=1.4\) and \(B=-0.3\), numerical iteration
-suggests that long orbits approach a thin attracting set of this type, usually
-called the Hénon attractor. []
-
-
-\begin{proposition}
-\begin{enumerate}[label=(\arabic*)]
-    \item The derivative of the Hénon map is
+    \begin{definition}[Hénon map]
+    For parameters \(A,B\in\mathbb R\), define
     \[
-    DF_{AB}(x,y)
-    =
+    F_{AB}(x,y) = (A-By-x^2,x).
+    \]
+    \end{definition}
+
+    For the classical parameters $A=1.4$, $B=-0.3$, we write $ F:=F_{1.4,-0.3}$. Numerical iteration suggests that long forward orbits of \(F\) approach a thin attracting set, usually called the classical Hénon attractor \cite{Henon1976,Robinson1999}.
+
+   
+    The derivative of the Hénon map is
+    \[
+    DF_{AB}(x,y) =
     \begin{pmatrix}
     -2x & -B\\
     1 & 0
-    \end{pmatrix}.
+    \end{pmatrix},
     \]
+    and hence $\det DF_{AB}(x,y)=B$. Thus, for \(|B|<1\), the map contracts area by the constant factor \(|B|\) at each step. In particular, since \(B=-0.3\neq0\), the classical map \(F=F_{1.4,-0.3}\) is invertible.
+
     
-    Moreover,
+    \begin{remark}[Relation with the common Hénon convention]
+    Some texts use
     \[
-    \det DF_{AB}(x,y)=B.
-    \]
-    \item If \(B\neq 0\), then \(F_{AB}\) is invertible and
-    \[
-    F^{-1}_{AB}(x,y)
+    H_{a,b}(x,y)=(1-ax^2+y,bx).
+    \] The two conventions are linearly conjugate after rescaling coordinates.
+    The classical parameters \(a=1.4\), \(b=0.3\) correspond to the convention above with $A=1.4$ and $B=-0.3$.
+    \end{remark}
+
+    The relevant geometric mechanism is the interaction between folding, dissipation, and tangent stretching. The nonlinear term \(-x^2\) folds regions in the plane, while the constant determinant gives uniform area contraction when \(|B|<1\). At the same time, individual tangent directions may still be expanded, and this is measured by the derivative cocycle  $D(F^k)(z_0)
     =
-    \left(
-    y,\frac{A-x-y^2}{B}
-    \right).
-    \]
-\end{enumerate}
-
-\end{proposition}
-
-\begin{remark}[Equivalent with $H(a,b)$]
+    DF(z_{k-1})\cdots DF(z_0).$
+    Thus the classical Hénon map is a natural setting for studying finite-time stretching rates and finite-time stable--unstable direction separation on a numerically observed strange attractor.
     
-\end{remark}
+    Depending on the parameters, the maximal invariant set can have different geometric forms. For fixed \(B\), sufficiently large \(A\) gives a horseshoe-type structure, while the classical parameters produce the numerically observed strange attractor studied here \cite{Robinson1999}. This makes the Hénon map a useful example for relating Lyapunov exponents, tangent directions, and fractal geometry.
+   
+    
 
-\subsection{Geometric mechanism: stretching, folding, and dissipation}
-\label{subsec:Geometric mechanism}
+\subsection{Numerical tangent diagnostics for the classical Hénon attractor}
 
-The Hénon map is useful because it gives a simple two-dimensional model of the
-geometric mechanism behind many chaotic attractors. It combines three effects:
-stretching, folding, and dissipation.
+The numerical part studies the tangent dynamics along long forward orbits of the classical Hénon map. The aim is to understand how the observed strange attractor combines expansion, contraction, and changing tangent directions. Two diagnostics are used: finite-time Lyapunov exponents measure stretching and contraction rates, while finite-time stable--unstable angles measure the separation of the numerically approximated tangent directions.
+
+These computations are not intended to prove hyperbolicity. Instead, they provide finite-time evidence about the local geometric mechanisms on the sampled attractor.
+
+\subsubsection{Finite-time quantities}
 
 \begin{enumerate}
-    \item The map is nonlinear in the \(x\)-coordinate. The term \(-x^2\) bends the image of vertical and horizontal sets and causes folding.
-    \item The derivative
-    \[
-    DF_{AB}(x,y)
-    =
-    \begin{pmatrix}
-    -2x & -B\\
-    1 & 0
-    \end{pmatrix}
-    \]
-    depends on the current position, so the local linear behaviour changes along
-    the orbit. The derivative cocycle
-    \(
-    D(F_{AB}^k)(z_0)
-    =
-    DF_{AB}(z_{k-1})\cdots DF_{AB}(z_0)
-    \)
-    records the cumulative stretching, contraction, and rotation of infinitesimal
-    directions along the orbit.
+    \item \textbf{Derivative products along an orbit:}
+    For an orbit \(z_{j+1}=F(z_j)\), we compute the finite derivative product
+    \(D(F^n)(z_j)=DF(z_{j+n-1})\cdots DF(z_j).
+    \) This matrix maps tangent perturbations at \(z_j\) to tangent perturbations at \(z_{j+n}\) over a finite orbit segment of length \(n\).
 
-    \item The determinant is constant:
-    \(
-    \det DF_{AB}(x,y)=B.
-    \)
-    When $|B|<1$, the map is dissipative. For the classical parameter choice, the areas are contracted by the factor \(|B|=0.3\) at each iterate, and the negative
-    sign indicates orientation reversal.
-\end{enumerate}
+    \item \textbf{Singular values and finite-time Lyapunov exponents}
 
+        Let \(L\in\mathbb R^{2\times 2}\). The singular values of \(L\) are \(\sigma_1(L)\geq \sigma_2(L)\geq 0,\)
+        where \(\sigma_i(L)^2\) are the eigenvalues of \(L^TL\), showing the maximal stretching factors of the linear map \(L\) in orthogonal directions.
+        
+        
+        For the derivative product \(D(F^n)(z_j)\), define
+        \[
+        \lambda_i^{(n)}(z_j)
+        =
+        \frac1n\log\sigma_i(D(F^n)(z_j)),
+        \qquad i=1,2.
+        \]
+        \(\lambda_1^{(n)}(z_j)\) measures the strongest average expansion rate over the finite segment, while \(\lambda_2^{(n)}(z_j)\) measures the strongest average contraction rate.
+        
+        As explained in the theoretical background, Oseledets' theorem motivates this definition by relating asymptotic Lyapunov exponents to the limits of \(\frac1n\log \sigma_i(D(F^n)(z)).\) In the numerical part, we only use the finite-time quantities \(\lambda_i^{(n)}(z_j)\). They should be interpreted as finite-window diagnostics of tangent stretching, not as proof that the asymptotic Lyapunov exponents exist at every sampled point.
+        
+        \begin{remark}[Area contraction for the Hénon map]
+        For the Hénon map, \(\det DF_{AB}(x,y)=B\), so that \(\det D(F^n)(z_j)=B^n.\)
+        Since the product of the singular values equals \(|\det D(F^n)(z_j)|\), we obtain
+        \(
+        \sigma_1(D(F^n)(z_j))\sigma_2(D(F^n)(z_j))= |B|^n.\) Therefore \(\lambda_1^{(n)}(z_j)+\lambda_2^{(n)}(z_j)=\log |B|.\)
+        For the classical parameters, this gives
+        \(
+        \lambda_1^{(n)}(z_j)+\lambda_2^{(n)}(z_j)=\log 0.3<0.\)
+        Thus the total area growth is always contracting, even when one tangent direction expands. Numerically, it is therefore enough to compute \(\lambda_1^{(n)}(z_j)\) from the largest singular value and then set \(\lambda_2^{(n)}(z_j)=\log|B|-\lambda_1^{(n)}(z_j).\)
+        \end{remark}
 
-The combination of these effects is the essential mechanism. Depending on the parameters, the maximum invariant set can have different geometric forms. For fixed $B$, sufficiently large $A$ produces a horseshoe-type structure, while some A, such as the classical parameter, produces a strange attractor. This makes the Hénon map a natural object for studying the relation between
-Lyapunov exponents, stable--unstable directions, and fractal geometry.
-
-
-
-
-\section{Numerical diagnostics}
-\label{sec:numerical-diagnostics}
-
-The numerical part of this report studies the linearised dynamics along long
-orbits of the Hénon map. The basic objects are derivative products, their singular
-values, finite-time Lyapunov exponents, and finite-time approximations of stable
-and unstable directions.
-
-\subsection{Theoretical basis}
-\label{Theoretical basis}
-
-\subsubsection{Derivative products along an orbit}
-
-Let
-\(F=F_{AB}:\mathbb R^2\to\mathbb R^2\)
-be the Hénon map, and let \(z_{j+1}=F(z_j)\)
-be an orbit. The derivative cocycle over this orbit is
-\[
-A_n(z_0)
-=
-D(F^n)(z_0)
-=
-DF(z_{n-1})DF(z_{n-2})\cdots DF(z_0).
-\]
-Thus a tangent perturbation \(v_0\in T_{z_0}\mathbb R^2\cong\mathbb R^2\)
-evolves according to $v_n=A_n(z_0)v_0.$
-
-The product \(A_n(z_0)\) records the cumulative stretching, contraction, and
-rotation of infinitesimal tangent directions along the orbit segment $z_0,z_1,\dots,z_n.$
-
-\subsubsection{Singular values and finite-time Lyapunov exponents}
-
-Let \(A\in\mathbb R^{2\times 2}\). The singular values of \(A\) are \(\sigma_1(A)\geq \sigma_2(A)\geq 0,
-\)
-where
-\[
-\sigma_i(A)
-=
-\sqrt{\lambda_i(A^T A)},\qquad i=1,2.
-\]
-Here \(\lambda_i(A^T A)\) denotes the \(i\)-th eigenvalue of the symmetric
-positive semidefinite matrix \(A^T A\).
-
-For the derivative product
-\(
-A_n(z)=D(F^n)(z),
-\)
-the finite-time Lyapunov exponents over \(n\) iterates are defined by
-\[
-\lambda_i^{(n)}(z)
-=
-\frac{1}{n}\log \sigma_i(A_n(z))=
-\frac{1}{2n}
-\log \lambda_i\left(A_n(z)^T A_n(z)\right),
-\qquad
-i=1,2.
-\]
-
-The largest finite-time Lyapunov exponent is therefore
-\[
-\lambda_1^{(n)}(z)
-=
-\frac{1}{n}\log \|A_n(z)\|,
-\]
-where \(\|\cdot\|\) is the operator norm induced by the Euclidean norm.
-
-\begin{remark}[Area contraction for the Hénon map]
-Since
-\(
-\det DF_{AB}(x,y)=B,
-\)
-we have \(
-\det A_n(z)=B^n.
-\)
-Hence
-\[
-\sigma_1(A_n(z))\sigma_2(A_n(z))
-=
-|\det A_n(z)|
-=
-|B|^n.
-\]
-Therefore,
-\[
-\lambda_1^{(n)}(z)+\lambda_2^{(n)}(z)
-=
-\log |B|.
-\]
-For the classical parameters, this gives\(
-\lambda_1^{(n)}(z)+\lambda_2^{(n)}(z)
-=
-\log 0.3<0\), reflecting the dissipative nature of the Hénon map.
-
-In the numerical computations, we compute \(\lambda_1^{(n)}(z)\) from the
-largest singular value and then obtain
-\(
-\lambda_2^{(n)}(z)
-=
-\log|B|-\lambda_1^{(n)}(z).
-\)
-\end{remark}
+        \iffalse
+        \begin{remark}[Finite-time interpretation]
+        The dependence of \(\lambda_i^{(n)}(z_j)\) on both the base point \(z_j\) and the step length \(n\) describes how stretching and contraction vary along the sampled attractor.
+        \end{remark}
+        \fi
 
 
-
-\subsubsection{Oseledets' theorem}
-
-The theoretical basis for using derivative products and singular values is the
-Multiplicative Ergodic Theorem, also called Oseledets' theorem.
-
-\begin{theorem}[Multiplicative Ergodic Theorem for a \(C^1\) diffeomorphism]
-Let \(F:\mathbb R^2\to\mathbb R^2\) be a \(C^1\) diffeomorphism, let
-\(\Lambda\subset\mathbb R^2\) be a compact invariant set, and let \(\mu\) be an
-ergodic \(F\)-invariant probability measure supported on \(\Lambda\). For
-\(n\geq 1\), define the derivative cocycle
-\(
-A_n(z)=D(F^n)(z).
-\)
-Then there exists a set \(\Lambda_0\subset\Lambda\) with
-\[
-\mu(\Lambda_0)=1,
-\qquad
-F(\Lambda_0)=\Lambda_0,
-\]
-such that for every \(z\in\Lambda_0\), the following properties hold.
-
-\begin{enumerate}[label=(\arabic*)]
-    \item There exist Lyapunov exponents
-    \(
-    \lambda_1>\lambda_2>\cdots>\lambda_\ell
-    \)
-    and a measurable splitting
-    \[
-    T_z\mathbb R^2
-    =
-    E_1(z)\oplus E_2(z)\oplus\cdots\oplus E_\ell(z),
-    \]
-    such that the splitting is invariant under the derivative:
-    \[
-    DF(z)E_i(z)=E_i(F(z)),
-    \qquad
-    i=1,\dots,\ell.
-    \]
     
-    \item For every nonzero vector \(v\in E_i(z)\),
+    \item \textbf{Finite-time stable and unstable directions and angles.}
+
+    The angle diagnostic is based on the following hyperbolic intuition. Suppose first that a genuine hyperbolic splitting \(T_z\mathbb R^2=E_z^s\oplus E_z^u \) exists. Then a generic tangent vector has a nonzero component in the unstable direction, and forward iteration amplifies this component relative to the stable one. Therefore, after repeated normalisation, forward propagation tends to align with the unstable direction. Similarly, backward propagation tends to align with the stable direction.
+
+    In the numerical computation, we use this mechanism only as a finite-time approximation procedure. We do not assume that the exact spaces \(E_z^s\) and \(E_z^u\) have already been proved to exist on the classical Hénon attractor.
+
+    \begin{definition}[Finite-time propagated directions]
+    Let \(N\geq 1\), and let $ z_{-N},z_{-N+1},\ldots,z_0,\ldots,z_N$ be an orbit segment with \(F(z_j)=z_{j+1}\) for $j=-N,...,-1, 0,1,...,N-1$.
+
+    \begin{enumerate}[label=(\arabic*)]
+        \item Choose a nonzero initial vector \(u_{-N}\in T_{z_{-N}}\mathbb R^2\), and define inductively by
+            \[
+            u_{j+1}
+            =
+            \frac{DF(z_j)u_j}{\|DF(z_j)u_j\|},
+            \qquad
+            j=-N,\ldots,-1.
+            \]
+        Then the unit vector \(u_0^{(N)}\) is used as the finite-time unstable direction at \(z_0\).
+
+        \item Choose a nonzero terminal vector \(s_N\in T_{z_N}\mathbb R^2\), and define inductively by
+            \[
+            s_{j-1}
+            =
+            \frac{DF(z_{j-1})^{-1}s_j}{\|DF(z_{j-1})^{-1}s_j\|},
+            \qquad
+            j=N,\ldots,1.
+            \]
+        Then the unit vector \(s_0^{(N)}\) is used as the finite-time stable direction at \(z_0\).
+        \end{enumerate}
+    \end{definition}
+
+    The finite-time stable--unstable angle is then defined by
     \[
-    \lim_{n\to\infty}
-    \frac{1}{n}\log \|A_n(z)v\|
+    \theta^{(N)}(z_0)
     =
-    \lambda_i.
+    \arccos
+    \left(
+    \left|
+    \left\langle s_0^{(N)},u_0^{(N)}\right\rangle
+    \right|
+    \right)
+    \in[0,\pi/2].
     \]
-    Equivalently, if
-    \[
-    \sigma_1(A_n(z))\geq \sigma_2(A_n(z))>0
-    \]
-    are the singular values of \(A_n(z)\), then the limits
-    \[
-    \lim_{n\to\infty}
-    \frac{1}{n}\log \sigma_i(A_n(z))
-    \]
-    exist for \(i=1,2\). These limits are the Lyapunov exponents counted with
-    multiplicity.
+
+    Note that singular values are used only for stretching rates, while the angle diagnostic uses propagated tangent directions.
+
+    For a uniformly hyperbolic invariant set, the stable and unstable directions are uniformly transverse:
+    \( \inf_{z\in\Lambda}\theta(z)>0. \)
+    Therefore, very small values of
+    \( \theta^{(N)}(z) \)
+    along a numerical orbit suggest small finite-time directional separation or possible near-tangencies.
+
     
+
 \end{enumerate}
-
-
-\end{theorem}
-
-
-The theorem shows that asymptotic Lyapunov exponents can be obtained from
-singular values of the derivative cocycle:
-\[
-\lambda_i
-=
-\lim_{n\to\infty}
-\frac{1}{n}\log \sigma_i(D(F^n)(z)).
-\]
-This is why the finite-time Lyapunov exponents used in the numerical part are
-defined by
-\[
-\lambda_i^{(n)}(z)
-=
-\frac{1}{n}\log \sigma_i(D(F^n)(z)).
-\]
-They are finite-window approximations of the asymptotic limits given by
-Oseledets' theorem.
-
-\begin{remark}[Relation with stable and unstable directions]
-Oseledets' theorem gives measurable subspaces \(E_i(z)\) on a full-measure set.
-When there are two distinct Lyapunov exponents
-\[
-\lambda^u>\lambda^s,
-\]
-one obtains a splitting
-\[
-T_z\mathbb R^2
-=
-E^u(z)\oplus E^s(z),
-\]
-where vectors in \(E^u(z)\) grow at rate \(\lambda^u\), and vectors in
-\(E^s(z)\) grow at rate \(\lambda^s\).
-
-For a uniformly hyperbolic invariant set, this measurable Oseledets splitting
-agrees almost everywhere with the continuous hyperbolic splitting
-\[
-T_z\mathbb R^2=E_z^s\oplus E_z^u.
-\]
-For a nonuniformly hyperbolic system, the Oseledets splitting may exist only
-almost everywhere and may be merely measurable rather than continuous.
-\end{remark}
-
-\begin{remark}[Finite-time interpretation]
-In numerical computations, the limit \(n\to\infty\) cannot be taken. Instead,
-one studies
-\[
-\lambda_i^{(n)}(z)
-=
-\frac{1}{n}\log \sigma_i(A_n(z)).
-\]
-The dependence of \(\lambda_i^{(n)}(z)\) on both \(z\) and \(n\) measures how
-finite-time stretching varies along the sampled orbit. Strong variation of these
-finite-time quantities indicates non-uniformity of expansion and contraction
-over the observed time windows.
-\end{remark}
-
-\subsubsection{Finite-time stable and unstable directions}
-
-For a hyperbolic invariant set, the tangent space splits as $T_z\mathbb R^2=E_z^s\oplus E_z^u$, thus any tangent vector \(v\in T_z\mathbb R^2\) can be written uniquely as
-\[
-v=v^s+v^u,
-\qquad
-v^s\in E_z^s,\quad v^u\in E_z^u.
-\]
-Under forward iteration,
-\[
-DF_z^k v
-=
-DF_z^k v^s+DF_z^k v^u.
-\]
-The stable component \(DF_z^k v^s\) is contracted, while the unstable component
-\(DF_z^k v^u\) is expanded. Therefore, unless \(v\in E_z^s\), the direction of
-\(DF_z^k v\) aligns with the unstable direction as \(k\to\infty\). Similarly,
-under backward iteration, a generic vector aligns with the stable direction.
-
-Thus, numerically, \(E_z^u\) is approximated by forward iteration from the
-past, and \(E_z^s\) is approximated by backward iteration from the future.
-
-\begin{definition}[Finite-time unstable and stable direction] Let \(N\geq 1\).
-\begin{enumerate}[label=(\arabic*)]
-    \item Let \(z_{-N}\) be a point on the backward orbit of \(z_0\),
-    so that \(F^N(z_{-N})=z_0.\)
-    Choose any nonzero vector \(u_{-N}\in T_{z_{-N}}\mathbb R^2\) which is not in
-    \(E_{z_{-N}}^s\), and define
-    \[
-    u_{j+1}
-    =
-    \frac{DF(z_j)u_j}{\|DF(z_j)u_j\|},
-    \qquad
-    j=-N,\dots,-1.
-    \]
-    Then \(u_0^{(N)}\) is used as a finite-time approximation of \(E_{z_0}^u\).
-
-    \item Let \(z_N=F^N(z_0).\) 
-    Choose any nonzero vector \(s_N\in T_{z_N}\mathbb R^2\) which is not in
-    \(E_{z_N}^u\), and define
-    \[
-    s_{j-1}
-    =
-    \frac{DF(z_{j-1})^{-1}s_j}{\|DF(z_{j-1})^{-1}s_j\|},
-    \qquad
-    j=N,\dots,1.
-    \]
-    Then \(s_0^{(N)}\) is used as a finite-time approximation of \(E_{z_0}^s\).
     
-\end{enumerate}
- 
-\end{definition}
-
-\begin{remark}[The two right singular vectors are not used for the angle]
-The singular values of $A_n(z)$ are used for finite-time Lyapunov exponents. However, the two singular vectors of \(A_n(z)\) are orthogonal because they are eigenvectors of the symmetric matrix \(A_n(z)^TA_n(z),\) which cannot measure
-the true angle between \(E_z^s\) and \(E_z^u\). 
-\end{remark}
-
-\subsubsection{Angle diagnostic}
-
-Once finite-time approximations $u_0^{(N)}$ and $s_0^{(N)}$
-have been obtained, the finite-time stable--unstable angle at \(z_0\) is defined by
-\[
-\theta^{(N)}(z_0)
-=
-\arccos
-\left(
-\left|
-\left\langle
-\frac{s_0^{(N)}}{\|s_0^{(N)}\|},
-\frac{u_0^{(N)}}{\|u_0^{(N)}\|}
-\right\rangle
-\right|
-\right)
-\in [0,\pi/2].
-\]The absolute value is used because the directions are lines rather than oriented vectors.
-
-For a uniformly hyperbolic invariant set, the stable and unstable directions are
-uniformly transverse, so one expects
-\[
-\inf_{z\in\Lambda}\theta(z)>0.
-\]
-Therefore, very small values of
-\(
-\theta^{(N)}(z)
-\)
-along a numerical orbit suggest near-tangencies or loss of uniformity in the
-finite-time hyperbolic structure.
+    
+    
+    
 
 
 
@@ -1092,78 +541,12 @@ finite-time hyperbolic structure.
 
 
 
-\subsection{Numerical algorithm and results}
-\label{subsec:numerical-algorithm-results}
-
-
-
-\subsubsection{Algorithmic summary}
-\label{subsubsec:algorithmic-summary}
-
-The numerical pipeline consists of three steps: generating a long orbit, computing
-finite-time Lyapunov exponents, and computing finite-time stable--unstable angles.
-
-\begin{algorithm}[H]
-\caption{Orbit generation}
-\KwIn{Initial point \(z_0\), burn-in time \(N_{\mathrm{burn}}\), total length \(N_{\mathrm{tot}}\)}
-\KwOut{Orbit \(z_0,\ldots,z_{N_{\mathrm{tot}}}\) after burn-in}
-
-\For{\(j=0,\ldots,N_{\mathrm{burn}}+N_{\mathrm{tot}}-1\)}{
-    \(z_{j+1}\leftarrow F(z_j)\)
-}
-Discard \(z_0,\ldots,z_{N_{\mathrm{burn}}-1}\)\;
-Relabel the remaining orbit as \(z_0,\ldots,z_{N_{\mathrm{tot}}}\)\;
-\Return{\(z_0,\ldots,z_{N_{\mathrm{tot}}}\)}
-\end{algorithm}
-
-\begin{algorithm}[H]
-\caption{Finite-time Lyapunov exponents}
-\KwIn{Orbit \((z_i)\), window length \(n\)}
-\KwOut{\(\lambda_1^{(n)}(z_i),\lambda_2^{(n)}(z_i)\)}
-
-\For{each sampled point \(z_i\)}{
-    \(A\leftarrow I_2\)\;
-    \For{\(j=0,\ldots,n-1\)}{
-        \(A\leftarrow DF(z_{i+j})A\)
-    }
-    \((\sigma_1,\sigma_2)\leftarrow \operatorname{singular\_values}(A)\), with \(\sigma_1\geq\sigma_2\)\;
-    \(\lambda_1^{(n)}(z_i)\leftarrow n^{-1}\log\sigma_1\)\;
-    \(\lambda_2^{(n)}(z_i)\leftarrow n^{-1}\log\sigma_2\)\;
-}
-\Return{\(\lambda_1^{(n)}(z_i),\lambda_2^{(n)}(z_i)\)}
-\end{algorithm}
-
-\begin{algorithm}[H]
-\caption{Finite-time stable--unstable angle}
-\KwIn{Orbit \((z_i)\), propagation length \(N\)}
-\KwOut{\(\theta^{(N)}(z_i)\)}
-
-\For{each sampled point \(z_i\)}{
-    Choose nonzero vectors \(u_{i-N}\) and \(s_{i+N}\)\;
-
-    \For{\(j=i-N,\ldots,i-1\)}{
-        \(u_{j+1}\leftarrow DF(z_j)u_j\)\;
-        \(u_{j+1}\leftarrow u_{j+1}/\|u_{j+1}\|\)\;
-    }
-
-    \For{\(j=i+N,\ldots,i+1\)}{
-        \(s_{j-1}\leftarrow DF(z_{j-1})^{-1}s_j\)\;
-        \(s_{j-1}\leftarrow s_{j-1}/\|s_{j-1}\|\)\;
-    }
-
-    \(\theta^{(N)}(z_i)\leftarrow
-    \arccos\!\left(|\langle u_i,s_i\rangle|\right)\)\;
-}
-\Return{\(\theta^{(N)}(z_i)\)}
-\end{algorithm}
-
-
-\subsubsection{Results}
-\label{subsubsec:numerical-results}
+\subsubsection{Numerical results and interpretation}
 
 We now apply the numerical diagnostics to the classical Hénon map. The orbit was generated from \(z_0=(0,0)\), with \(10^4\) burn-in iterates
 discarded and \(10^5\) points retained. The finite-time Lyapunov exponents were
-computed at \(5000\) sampled base points on the orbit.
+computed at \(5000\) sampled base points on the orbit. 
+
 
 \begin{enumerate}
     \item \textbf{Finite-time Lyapunov exponents.}
@@ -1186,8 +569,7 @@ computed at \(5000\) sampled base points on the orbit.
         \centering
         \begin{minipage}[c][0.27\textheight][c]{\textwidth}
             \centering
-            \includegraphics[width=\textwidth,height=0.27\textheight,keepaspectratio]
-            {numerical graphs/hist_lambda1_compare_n.png}
+            \includegraphics[width=\textwidth,height=0.27\textheight,keepaspectratio]{figures/figures_sc/hist_lambda1_compare_n.png}
         \end{minipage}
         \caption{\centering Distributions of \(\lambda_1^{(n)}(z)\) for
         \(n=50,100,200,500\).}
@@ -1198,8 +580,7 @@ computed at \(5000\) sampled base points on the orbit.
         \centering
         \begin{minipage}[c][0.27\textheight][c]{\textwidth}
             \centering
-            \includegraphics[width=\textwidth,height=0.27\textheight,keepaspectratio]
-            {numerical graphs/mean_std_lambda1_vs_n.png}
+            \includegraphics[width=\textwidth,height=0.27\textheight,keepaspectratio]{figures/figures_sc/mean_std_lambda1_vs_n.png}
         \end{minipage}
         \caption{\centering Mean and standard deviation of \(\lambda_1^{(n)}(z)\).}
         \label{fig:ftle-mean-std}
@@ -1214,47 +595,28 @@ computed at \(5000\) sampled base points on the orbit.
     
     Figure~\ref{fig:ftle-distribution-convergence} shows how
     \(\lambda_1^{(n)}(z)\) depends on both the base point \(z\) and the window length
-    \(n\). In (a), shorter windows give broader distributions, while larger
-    \(n\) concentrates the values near the global estimate
-    \(\lambda_1\approx 0.4214\). (b) shows the same convergence quantitatively:
+    \(n\). In (a), shorter windows give broader distributions, showing that the local finite-time expansion rate varies noticeably across different orbit lengths. As \(n\) increases, the distribution becomes more concentrated near the long-orbit estimate \(\lambda_1\approx 0.4214\). (b) shows the same convergence quantitatively:
     from \(n=50\) to \(n=500\), the mean decreases from \(0.4296\) to \(0.4223\),
-    and the standard deviation decreases from \(0.0518\) to \(0.0163\). Thus
-    finite-time expansion is locally nonuniform, while longer windows average these
-    fluctuations toward the asymptotic Lyapunov exponent. This motivates the angle
-    diagnostic below, which tests the geometric separation of stable and unstable
-    directions.
+    and the standard deviation decreases from \(0.0518\) to \(0.0163\).     
+       
+     Thus the finite-time exponents indicate: local stretching is non-uniform over short windows, while the averaged expansion rate stabilises near a positive value. Together with \( \lambda_1^{(n)}(z)+\lambda_2^{(n)}(z)=\log 0.3<0,\)
+    this supports the expected dissipative stretching mechanism of the Hénon attractor: one tangent direction expands on average, while the total area is contracted.
+
     
 
 
     \item \textbf{Finite-time stable--unstable angles.}
+    The second diagnostic examines whether the propagated finite-time stable and unstable directions remain separated. For the classical Hénon parameter, these directions are interpreted only as finite-time numerical approximations, not as a proved invariant splitting.
+
+    Rigorous non-uniform hyperbolicity results are known for certain Hénon parameter sets, such as the Benedicks--Carleson parameters, but these results do not directly apply to the classical parameter considered here \cite{BenedicksCarleson1991, GaliasTucker2015}. Therefore, the computed directions are interpreted only as finite-time approximations along the sampled orbit, not as a proof of global hyperbolicity.
+
     
-    I next tested the geometric part of hyperbolicity. For a uniformly hyperbolic
-    set, the stable and unstable directions are uniformly transverse, so their angle
-    is bounded away from zero. For the classical Hénon parameter, however, we do not
-    assume that a uniformly hyperbolic splitting exists. Rigorous non-uniform
-    hyperbolicity results are known for certain Hénon parameter sets, such as the
-    Benedicks--Carleson parameters, but the classical value \(B=-0.3\) is outside
-    the small-dissipation regime where these results directly apply
-    \cite{BenedicksCarleson1991,BenedicksYoung1993,GaliasTucker2015}. Thus the
-    directions computed here are interpreted as finite-time diagnostics, not as a
-    proof of a globally defined splitting.
     
-    For each sampled point \(z_i\), we approximate the unstable and stable directions and the finite-time angle as in 4.1.
+    Figure~\ref{fig:angle-summary-tail} shows the angle diagnostic. (a) indicates that the direction approximation stabilises rapidly as the propagation length \(N\) increases: from about \(N=10\) onwards, the \(1\%\) quantile, \(5\%\) quantile and median change very little. This suggests that the computed directions are not mainly determined by the arbitrary initial tangent vectors used in the propagation.
     
-    Figure~\ref{fig:angle-summary-tail} shows the angle diagnostic. In (a),
-    the angle statistics stabilise rapidly as \(N\) increases. From about \(N=10\)
-    onwards, the \(1\%\) quantile, \(5\%\) quantile and median are essentially
-    unchanged. This suggests that the computed directions are not dominated by the
-    arbitrary choice of initial tangent vectors. We therefore use \(N=100\) as a
-    representative propagation length.
-    
-    For \(N=100\), the median angle is approximately \(53.8^\circ\), so most sampled
-    points have well-separated finite-time directions. However, (b) shows a
-    small but visible lower tail near zero. In our sample, approximately \(0.44\%\)
-    of points have angle below \(1^\circ\), \(0.84\%\) have angle below \(2^\circ\),
-    and \(1.96\%\) have angle below \(5^\circ\). These small finite-time angles are
-    interpreted as near-tangencies in the direction diagnostic.
-    
+    We therefore use \(N=100\) as a representative propagation length. The lower tail in (b) indicates that some sampled points have very small finite-time directional separation.
+
+       
  \begin{figure}[H]
     \centering
 
@@ -1263,7 +625,7 @@ computed at \(5000\) sampled base points on the orbit.
         \begin{minipage}[c][0.27\textheight][c]{\textwidth}
             \centering
             \includegraphics[width=\textwidth,height=0.27\textheight,keepaspectratio]
-            {numerical graphs/angle_summary_vs_N.png}
+            {figures/figures_sc/angle_summary_vs_N.png}
         \end{minipage}
         \caption{\centering Angle quantiles as the propagation length \(N\) increases.}
         \label{fig:angle-summary}
@@ -1274,7 +636,7 @@ computed at \(5000\) sampled base points on the orbit.
         \begin{minipage}[c][0.27\textheight][c]{\textwidth}
             \centering
             \includegraphics[width=\textwidth,height=0.27\textheight,keepaspectratio]
-            {numerical graphs/angle_lower_tail_cdf.png}
+            {figures/figures_sc/angle_lower_tail_cdf.png}
         \end{minipage}
         \caption{\centering Lower tail of \(\theta^{(100)}(z)\).}
         \label{fig:angle-lower-tail}
@@ -1286,42 +648,31 @@ computed at \(5000\) sampled base points on the orbit.
     \label{fig:angle-summary-tail}
     \end{figure}
 
-    Figure~\ref{fig:small-angle-spatial} separates near-tangency candidates
-    \(\theta^{(100)}(z)<1^\circ\) from the broader lower tail
-    \(1^\circ\leq\theta^{(100)}(z)<5^\circ\). The marked points are not spread
-    uniformly over the sampled attractor; they appear mainly near bending or
-    branch-close regions, especially near the right-hand turning part. This gives a
-    qualitative indication that the small-angle events may be linked to the folding
-    geometry of the attractor.
-    
+
+
+
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.62\textwidth]{numerical graphs/small_and_very_small_angle_points_N100.png}
+        \includegraphics[width=0.62\textwidth]{figures/figures_sc/small_and_very_small_angle_points_N100.png}
         \caption{\centering Small-angle points on the sampled Hénon attractor for \(N=100\).}
         \label{fig:small-angle-spatial}
     \end{figure}
+
+
+    Figure~\ref{fig:small-angle-spatial} shows that the small-angle points are not distributed uniformly over the sampled attractor. They appear concentrated near bending or regions where nearby branches of the sampled set come close together, especially near the right-hand turning part. This suggests that these small angles might be linked to the folding geometry of the attractor rather than arising as isolated numerical noise. More cautiously, the computation indicates that small directional separation occurs preferentially in geometrically complicated regions of the sampled attractor.
+
     
-    Overall, the angle diagnostic does not provide evidence for a uniform lower
-    bound on the finite-time stable--unstable angle. Most sampled points have
-    well-separated directions, but a small lower tail of very small angles remains.
-    This suggests possible non-uniform finite-time behaviour, but does not prove
-    non-uniform hyperbolicity for the classical Hénon parameter.
+    
+
+
+    Overall, the angle diagnostic gives a mixed conclusion. Most sampled points have well-separated finite-time directions, which is consistent with hyperbolic-type tangent behaviour on a large part of the attractor. However, the persistent small-angle lower tail means that the computation does not support a numerical uniform lower bound on directional separation. The distribution of small-angle points suggests that the loss of transversality is likely to be tied to specific folded regions of the attractor. Thus the angle diagnostic supports a picture of non-uniform finite-time tangent geometry: directional separation is typical, but not uniform across the sampled attractor. This should be interpreted as non-uniform finite-time tangent behaviour, not as a proof of non-uniform hyperbolicity for the classical Hénon parameter.
+
     
     \item \textbf{Comparison between stretching and angle diagnostics.}
-    
-    The two diagnostics test different aspects of hyperbolic behaviour. The
-    finite-time Lyapunov exponents measure stretching rates, while the angle
-    diagnostic measures the separation between finite-time expanding and contracting
-    directions.
-    
-    The Lyapunov computation gives
-    \(
-    \lambda_1>0, \lambda_2<0,
-    \)
-    showing average expansion and contraction along the sampled orbit. However,
-    \(\lambda_1^{(n)}(z)\) varies across orbit segments, and the angle diagnostic
-    also shows a small lower tail of near-tangency candidates. Thus the numerical
-    results suggest some possible hyperbolic behaviour, but they can't indicate the uniformity of the hyperbolicity.
+
+    The two diagnostics test different aspects of the same finite-time picture. The finite-time Lyapunov exponents measure the size of stretching and contraction, while the angle diagnostic measures the separation of the propagated stable and unstable directions. Together, they suggest average expansion with area contraction, but without numerical support for uniform directional separation across the whole sampled orbit.
+
+
     
 
     
@@ -1329,53 +680,24 @@ computed at \(5000\) sampled base points on the orbit.
 
 
 
-\section{Conclusion}
-\label{sec:conclusion}
+\subsection{Connection with dimension}
 
+The numerical Lyapunov exponent estimates also link with fractal dimension through the Kaplan--Yorke, or Lyapunov dimension \cite{EckmannRuelle1985}. For a two-dimensional dissipative map with
+\(
+\lambda_1>0,
+\qquad
+\lambda_1+\lambda_2<0,
+\)
+the Kaplan--Yorke estimate is
+\[
+D_{KY}
+=
+1+\frac{\lambda_1}{|\lambda_2|}.
+\]
+Using the numerical estimates $\lambda_1\approx 0.4214$, $\lambda_2\approx -1.6254$, we obtain
+\(
+D_{KY}\approx 1.259.
+\)
 
+This is consistent with the geometric picture of the Hénon attractor as a thin fractal set: one tangent direction expands on average, giving a dimension larger than \(1\), while the total area contraction keeps the dimension below \(2\). However, this should only be interpreted as a Lyapunov-dimension estimate. It is not a rigorous computation of Hausdorff dimension, box-counting dimension, or the dimension of an invariant measure.
 
-
-
-\begin{thebibliography}{99}
-
-\bibitem{Henon1976}
-M. Hénon,
-\emph{A two-dimensional mapping with a strange attractor},
-Communications in Mathematical Physics, 50 (1976), 69--77.
-
-\bibitem{BenedicksCarleson1991}
-M. Benedicks and L. Carleson,
-\emph{The dynamics of the Hénon map},
-Annals of Mathematics, 133(1) (1991), 73--169.
-
-\bibitem{GaliasTucker2015}
-Z. Galias and W. Tucker,
-\emph{Is the Hénon attractor chaotic?},
-Chaos, 25(3) (2015), 033102.
-
-\bibitem{Robinson1999}
-C. Robinson,
-\emph{Dynamical Systems: Stability, Symbolic Dynamics, and Chaos},
-2nd ed., CRC Press, Boca Raton, 1999.
-
-\bibitem{Barreira2012}
-L. Barreira,
-\emph{Ergodic Theory, Hyperbolic Dynamics and Dimension Theory},
-Universitext, Springer, Berlin, 2012.
-
-\bibitem{ColoniusKliemann2014}
-F. Colonius and W. Kliemann,
-\emph{Dynamical Systems and Linear Algebra},
-Graduate Studies in Mathematics, Vol. 158, American Mathematical Society,
-Providence, RI, 2014.
-
-\bibitem{Sandri1996}
-M. Sandri,
-\emph{Numerical calculation of Lyapunov exponents},
-The Mathematica Journal, 6(3) (1996), 78--84.
-
-\end{thebibliography}
-
-
-
-\end{document}
